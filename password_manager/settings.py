@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 ]
 
+AUTH_USER_MODEL = 'password_manager.User'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
