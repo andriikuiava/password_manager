@@ -1,6 +1,4 @@
 from django.db import models
-
-
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 
@@ -36,6 +34,30 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
+class Category(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    created_at = models.DateField()
+    updated_at = models.DateField()
+
+    def __str__(self):
+        return self.name
+
+class Password(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="passwords")
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
+    service_name = models.CharField(max_length=255)
+    encrypted_password = models.CharField(max_length=255)
+    username_for_service = models.CharField(max_length=255)
+    created_at = models.DateField()
+    updated_at = models.DateField()
+
+    def __str__(self):
+        return self.service_name
+
+
 class MasterPasswordHistory(models.Model):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -67,32 +89,6 @@ class AuditLogs(models.Model):
     def __str__(self):
         return f"Audit log for {self.user}"
 
-
-class Category(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    created_at = models.DateField()
-    updated_at = models.DateField()
-
-    def __str__(self):
-        return self.name
-
-
-class Password(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="passwords")
-    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
-    service_name = models.CharField(max_length=255)
-    encrypted_password = models.CharField(max_length=255)
-    username_for_service = models.CharField(max_length=255)
-    created_at = models.DateField()
-    updated_at = models.DateField()
-
-    def __str__(self):
-        return self.service_name
-
-
 class TwoFactorAuth(models.Model):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -103,11 +99,3 @@ class TwoFactorAuth(models.Model):
     def __str__(self):
         return f"2FA for {self.user}"
 
-
-class SessionData(models.Model):
-    session_key = models.BigIntegerField(primary_key=True)
-    session_data = models.CharField(max_length=255)
-    expire_date = models.DateField()
-
-    def __str__(self):
-        return f"Session {self.session_key}"
