@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'password_manager',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 AUTH_USER_MODEL = 'password_manager.User'

@@ -27,11 +27,9 @@ class ChangeMasterPasswordView(APIView):
             changed_at=date.today()
         )
 
-        # Update the master password
         user.set_password(new_password)
         user.save()
 
-        # Log the action in AuditLogs
         AuditLogs.objects.create(
             user=user,
             action_type="PASSWORD_CHANGE",

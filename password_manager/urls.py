@@ -1,8 +1,9 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from password_manager.views.auth.login import LoginView
+from password_manager.views.auth.logout_all import LogoutAllView
 from password_manager.views.auth.master_password.update_master_password import ChangeMasterPasswordView
-from password_manager.views.auth.register import RegisterView
+from password_manager.views.auth.register import RegisterView, DeleteUserView
 from password_manager.views.manager.category.create_category import CreateCategoryView, GetUsersCategoriesView, \
     DeleteCategoryView
 from password_manager.views.manager.category.get_category import GetPasswordsByCategoryView
@@ -15,6 +16,8 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('update-master-password/', ChangeMasterPasswordView.as_view(), name='update-master-password'),
+    path('logout-all/', LogoutAllView.as_view(), name='logout-all'),
+    path('delete-account/', DeleteUserView.as_view(), name='delete-account'),
 
     path('categories/', GetUsersCategoriesView.as_view(), name='get-users-categories'),
     path('create-category/', CreateCategoryView.as_view(), name='create-category'),

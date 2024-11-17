@@ -4,10 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from password_manager.models import Password, Category
 from cryptography.fernet import Fernet
-import base64
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
-from password_manager.views.manager.create_password import get_master_password, generate_key_from_master_password
+from password_manager.views.manager.create_password import get_user_encryption_key, generate_key_from_encryption_key
+
 
 class GetPasswordsByCategoryView(APIView):
     permission_classes = [IsAuthenticated]
@@ -25,8 +23,8 @@ class GetPasswordsByCategoryView(APIView):
         if not passwords.exists():
             return Response({"error": "No passwords found for this category."}, status=status.HTTP_404_NOT_FOUND)
 
-        user_master_password = get_master_password(user)
-        key = generate_key_from_master_password(user_master_password)
+        user_master_password = get_user_encryption_key(user)
+        key = generate_key_from_encryption_key(user_master_password)
         fernet = Fernet(key)
 
         password_data = []
