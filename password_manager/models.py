@@ -25,7 +25,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
-    encryption_key = models.CharField(max_length=255, blank=True)
 
     objects = UserManager()
 
@@ -34,6 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
 
 class Category(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -44,6 +44,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Password(models.Model):
     id = models.BigAutoField(primary_key=True)

@@ -1,10 +1,13 @@
 from datetime import date
+import cryptography
+from cryptography.fernet import Fernet
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import check_password
-from password_manager.models import AuditLogs, MasterPasswordHistory
+from password_manager.models import AuditLogs, MasterPasswordHistory, Password
+from password_manager.views.manager.create_password import generate_key_from_encryption_key, get_user_encryption_key
 
 
 class ChangeMasterPasswordView(APIView):
@@ -20,6 +23,25 @@ class ChangeMasterPasswordView(APIView):
 
         if not new_password or len(new_password) < 8:
             return Response({"error": "New password must be at least 8 characters long"}, status=status.HTTP_400_BAD_REQUEST)
+
+        old_encryption_key = generate_key_from_encryption_key(get_user_encryption_key(user))
+        old_fernet = Fernet(old_encryption_key)
+
+        user.password = new_password
+        new_encryption_key = generate_key_from_encryption_key(get_user_encryption_key(user))
+        new_fernet = Fernet(new_encryption_key)
+
+        passwords = Password.objects.filter(user=user)
+        for password_obj in passwords:
+            try:
+                decrypted_password = old_fernet.decrypt(password_obj.encrypted_password.encode()).decode()
+                password_obj.encrypted_password = new_fernet.encrypt(decrypted_password.encode()).decode()
+                password_obj.save()
+            except (cryptography.fernet.InvalidToken, ValueError):
+                return Response(
+                    {"error": f"Failed to decrypt or re-encrypt password for service {password_obj.service_name}."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
         MasterPasswordHistory.objects.create(
             user=user,

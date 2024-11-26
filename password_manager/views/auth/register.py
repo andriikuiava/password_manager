@@ -21,15 +21,14 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def generate_encryption_key(master_password):
+def generate_encryption_key(password):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=b'some_random_salt',
+        salt=b'some_static_salt',
         iterations=100000
     )
-    key = kdf.derive(master_password.encode())
-    return base64.urlsafe_b64encode(key)
+    return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
 class DeleteUserView(APIView):
     permission_classes = [AllowAny]

@@ -3,9 +3,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from password_manager.models import Password
-from password_manager.views.manager.create_password import generate_key_from_encryption_key, get_user_encryption_key
+from password_manager.views.manager.create_password import get_user_encryption_key, generate_key_from_encryption_key
 
 
 class GetAllPasswordsView(APIView):
@@ -13,14 +12,13 @@ class GetAllPasswordsView(APIView):
 
     def get(self, request):
         user = request.user
-
         passwords = Password.objects.filter(user=user)
 
         if not passwords.exists():
             return Response({"error": "No passwords found."}, status=status.HTTP_404_NOT_FOUND)
 
-        user_master_password = get_user_encryption_key(user)
-        key = generate_key_from_encryption_key(user_master_password)
+        encryption_key = get_user_encryption_key(user)
+        key = generate_key_from_encryption_key(encryption_key)
         fernet = Fernet(key)
 
         password_data = []

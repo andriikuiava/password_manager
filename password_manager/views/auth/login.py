@@ -30,12 +30,6 @@ class LoginView(APIView):
             try:
                 user = User.objects.get(username=username)
             except User.DoesNotExist:
-                FailedLoginAttempts.objects.create(
-                    user=None,
-                    ip_address=ip_address,
-                    attempt_time=now(),
-                    was_successful=False
-                )
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
             if check_password(password, user.password):

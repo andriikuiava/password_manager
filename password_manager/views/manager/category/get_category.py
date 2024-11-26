@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from password_manager.models import Password, Category
 from cryptography.fernet import Fernet
-from password_manager.views.manager.create_password import get_user_encryption_key, generate_key_from_encryption_key
+from password_manager.views.auth.register import generate_encryption_key
 
 
 class GetPasswordsByCategoryView(APIView):
@@ -17,15 +17,13 @@ class GetPasswordsByCategoryView(APIView):
         except Category.DoesNotExist:
             return Response({"error": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Retrieve passwords for the specified category
         passwords = Password.objects.filter(category=category, user=user)
 
         if not passwords.exists():
             return Response({"error": "No passwords found for this category."}, status=status.HTTP_404_NOT_FOUND)
 
-        user_master_password = get_user_encryption_key(user)
-        key = generate_key_from_encryption_key(user_master_password)
-        fernet = Fernet(key)
+        encryption_key = generate_encryption_key(user.password)
+        fernet = Fernet(encryption_key)
 
         password_data = []
         for password in passwords:
@@ -40,4 +38,3 @@ class GetPasswordsByCategoryView(APIView):
             })
 
         return Response(password_data, status=status.HTTP_200_OK)
-

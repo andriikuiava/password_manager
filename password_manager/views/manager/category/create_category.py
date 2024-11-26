@@ -36,7 +36,6 @@ class CreateCategoryView(APIView):
         if Category.objects.filter(user=user, name=category_name).exists():
             return Response({"error": "Category with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create the category
         category = Category.objects.create(
             user=user,
             name=category_name,
