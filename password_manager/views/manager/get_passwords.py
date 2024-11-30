@@ -15,7 +15,7 @@ class GetAllPasswordsView(APIView):
         passwords = Password.objects.filter(user=user)
 
         if not passwords.exists():
-            return Response({"error": "No passwords found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response([], status=status.HTTP_200_OK)
 
         encryption_key = get_user_encryption_key(user)
         key = generate_key_from_encryption_key(encryption_key)
