@@ -64,29 +64,3 @@ class CreatePasswordView(APIView):
             "user": user.username,
             "category_id": category.id if category else None
         }, status=status.HTTP_201_CREATED)
-
-class EditPasswordView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request, password_id):
-        user = request.user
-        password = Password.objects.filter(id=password_id, user=user).first()
-        new_password = request.data.get('password')
-        new_username = request.data.get('username_for_service')
-
-        if not password:
-            return Response({"error": "Password not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        encryption_key = get_user_master_password(user)
-        key = generate_key_from_encryption_key(encryption_key)
-        fernet = Fernet(key)
-
-        encrypted_password = fernet.encrypt(new_password.encode()).decode()
-
-        password.encrypted_password = encrypted_password
-        password.username_for_service = new_username
-        password.updated_at = date.today()
-        password.save()
-
-        return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
-
