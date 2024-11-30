@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from password_manager.models import Password
-from password_manager.views.manager.create_password import get_user_encryption_key, generate_key_from_encryption_key
+from password_manager.views.manager.create_password import get_user_master_password, generate_key_from_master_password
 
 
 class GetAllPasswordsView(APIView):
@@ -17,8 +17,8 @@ class GetAllPasswordsView(APIView):
         if not passwords.exists():
             return Response([], status=status.HTTP_200_OK)
 
-        encryption_key = get_user_encryption_key(user)
-        key = generate_key_from_encryption_key(encryption_key)
+        master_password = get_user_master_password(user)
+        key = generate_key_from_master_password(master_password)
         fernet = Fernet(key)
 
         password_data = []

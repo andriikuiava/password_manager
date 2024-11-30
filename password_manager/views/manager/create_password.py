@@ -12,18 +12,18 @@ from password_manager.models import Category, Password
 from datetime import date
 
 
-def get_user_encryption_key(user):
-    return user.encryption_key
+def get_user_master_password(user):
+    return user.password
 
 
-def generate_key_from_encryption_key(encryption_key):
+def generate_key_from_master_password(master_password):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
         salt=b'some_random_salt',
         iterations=100000
     )
-    key = kdf.derive(encryption_key.encode())
+    key = kdf.derive(master_password.encode())
     return base64.urlsafe_b64encode(key)
 
 
@@ -37,9 +37,9 @@ class CreatePasswordView(APIView):
         username_for_service = request.data.get('username_for_service')
 
         user = request.user
-        encryption_key = get_user_encryption_key(user)
+        master_password = get_user_master_password(user)
 
-        key = generate_key_from_encryption_key(encryption_key)
+        key = generate_key_from_master_password(master_password)
         fernet = Fernet(key)
 
         encrypted_password = fernet.encrypt(password.encode()).decode()
@@ -77,7 +77,7 @@ class EditPasswordView(APIView):
         if not password:
             return Response({"error": "Password not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        encryption_key = get_user_encryption_key(user)
+        encryption_key = get_user_master_password(user)
         key = generate_key_from_encryption_key(encryption_key)
         fernet = Fernet(key)
 
